@@ -17,6 +17,7 @@
 - [种子] ELF 自解压加载器逆向 — 关键词: ARM64, LZSS, mmap, 自解压, 反分析, 损坏PHDR
 - [种子] Go 恶意软件逆向（stripped+Garble）— 关键词: Go, Garble, GoReSym, GoResolver, C2, AES密钥
 - [2026-05-15] lumine v0.9.1 Go TLS 分片代理逆向 — 关键词: Go, TLS, 分片代理, GoReSym, 源码重建, PE32+, capstone
+- [2026-05-16] 麟羽 LinYu Android 内核模块加载器逆向 — 关键词: ARM64, LZSS, 自解压Loader, 内核模块, finit_module, PHDR损坏, 反分析, AOSP Clang
 
 ### 渗透测试
 - [种子] Web API 未授权访问+IDOR — 关键词: REST API, IDOR, 越权, Swagger暴露, FFUF
@@ -44,7 +45,7 @@
 
 ## 累计统计
 
-- 总项目数: 6（含 4 个种子 + 2 个真实项目）
-- 新增模式数: 9
+- 总项目数: 7（含 4 个种子 + 3 个真实项目）
+- 新增模式数: 10
 - 工具链修复数: 0
-- 最近更新: 2026-05-15
+- 最近更新: 2026-05-16
