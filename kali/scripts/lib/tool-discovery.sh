@@ -51,6 +51,7 @@ declare -a TOOL_CATALOG=(
     "msfconsole|pentest-tools|Metasploit 框架|--version|msfconsole"
     "nikto|pentest-tools|Web 漏洞扫描|-Version|nikto"
     "binwalk|reverse-engineering|固件分析与提取|--help|binwalk"
+    "bkcrack|reverse-engineering|CTF ZIP/PKZIP ZipCrypto 已知明文攻击|--version|bkcrack"
     "gdb|reverse-engineering|调试器|--version|gdb"
     "objdump|reverse-engineering|反汇编|--version|objdump"
     "strings|reverse-engineering|字符串提取|--version|strings"
@@ -120,6 +121,7 @@ declare -A SCRIPT_REFS=(
     ["pentestswarm"]="pentest-tools/SKILL.md"
     ["evil-winrm-py"]="pentest-tools/SKILL.md"
     ["gef"]="reverse-engineering/SKILL.md"
+    ["bkcrack"]="reverse-engineering/crypto-decode-tools.md,../CTF-Sandbox-Orchestrator/competition-zip-archive/SKILL.md"
     ["netexec"]="pentest-tools/SKILL.md"
     ["responder"]="pentest-tools/SKILL.md"
 )

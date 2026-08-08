@@ -68,9 +68,7 @@ PRIMARY ladder: [skills/MASTER-ROUTING.md](skills/MASTER-ROUTING.md) · Full mat
 <br/>
 
 <div align="center">
-  <a href="https://star-history.com/#zhaoxuya520/reverse-skill&Date">
-    <img src="docs/assets/star-history.svg" alt="Star History" width="650" />
-  </a>
+  <a href="https://afterglow.watch"><img src="https://afterglow.watch/badge/zhaoxuya520/reverse-skill" alt="star velocity"></a>
 </div>
 
 <br/>
@@ -138,6 +136,7 @@ Platform-specific docs:
 | Malware / YARA | `skills/malware-analysis/` |
 | Penetration testing / scanning | `skills/pentest-tools/` |
 | Attack chain / red-team orchestration | `skills/attack-chain/` |
+| Case evidence review / report handoff | `skills/case-review/` |
 | CTF competition | `CTF-Sandbox-Orchestrator/` (40+ sub-skills) |
 | Firmware / IoT | `skills/firmware-pentest/` |
 | Patch diff / N-day | `skills/patch-diff-exploit/` |
@@ -158,10 +157,36 @@ Platform-specific docs:
 | [skills/MASTER-ROUTING.md](skills/MASTER-ROUTING.md) | PRIMARY fast ladder |
 | [skills/routing.md](skills/routing.md) | Task → skill routing matrix |
 | [skills/SKILL.md](skills/SKILL.md) | Master entry point |
+| [skills/INDEX.md](skills/INDEX.md) | Auto-generated, client-neutral skill navigation index |
+| [skills/config/routing.json](skills/config/routing.json) | **Routing single source of truth** (R0–R39 keyword rules) |
 | [skills/tool-index.md](skills/tool-index.md) | Local tool status (auto-generated) |
-| [skills/scripts/master-route.ps1](skills/scripts/master-route.ps1) | One-shot PRIMARY triage |
+| [skills/scripts/master-route.ps1](skills/scripts/master-route.ps1) | One-shot PRIMARY triage (reads routing.json) |
 | [skills/scripts/case-init.ps1](skills/scripts/case-init.ps1) | Case dir: scope / timeline / workitems |
+| [skills/case-review/](skills/case-review/) | Read-only Evidence graph review and artifact fixity checks |
+| [skills/scripts/test-routing.ps1](skills/scripts/test-routing.ps1) | Routing regression runner (162 benchmark cases) |
+| [skills/scripts/verify-routing-coherence.ps1](skills/scripts/verify-routing-coherence.ps1) | Structure + supply-chain pin gate checks |
+| [skills/scripts/extract-summaries.ps1](skills/scripts/extract-summaries.ps1) | Regenerates INDEX.md from skill frontmatter |
+| [AGENTS.md](AGENTS.md) | Platform-neutral repository instructions |
 | [skills/ops/](skills/ops/) | Scope, Evidence chain, roles, timeline (skill-router form) |
+
+### Testing (run after any routing/config change)
+
+```powershell
+# 1. Routing regression — 162 (hint → expected PRIMARY) cases, fails CI on any mismatch
+powershell -NoProfile -ExecutionPolicy Bypass -File skills/scripts/test-routing.ps1
+# 2. Structure coherence + supply-chain pin gate (unpinned auto-install fails)
+powershell -NoProfile -ExecutionPolicy Bypass -File skills/scripts/verify-routing-coherence.ps1
+# 3. Smoke: verify + script parse + quick route matrix
+powershell -NoProfile -ExecutionPolicy Bypass -File skills/scripts/smoke.ps1
+# 4. INDEX.md drift check (regenerate with extract-summaries.ps1 if dirty)
+powershell -NoProfile -ExecutionPolicy Bypass -File skills/scripts/extract-summaries.ps1 -Check
+```
+
+GitHub Actions CI runs all of the above on **Windows + Ubuntu** for every push/PR.
+
+### Client-neutral integration
+
+The routing core, regression suite, manifests, and case workflow do not depend on a specific AI client. Claude Code, Codex, Cursor, OpenCode, and other clients should load the repository through their own adapter or project-instruction mechanism. Client-specific configuration must remain optional and outside the core routing contract.
 
 ### Repository layout
 
@@ -190,6 +215,7 @@ Platform-specific docs:
 <a id="sponsors"></a>
 
 ## Sponsors
+<a href="https://www.atlascloud.ai/?ref=W3Q77C"><img src="https://www.atlascloud.ai/oss-program/powered-by-atlas-cloud.svg" alt="Powered by Atlas Cloud" height="28" /></a>
 
 For sponsorship or business inquiries:
 
@@ -246,7 +272,7 @@ Special thanks to the OLLVM deobfuscation ecosystem contributors and everyone wh
 
 ## Contact
 
-- **Email:** [24781737@qq.com](mailto:24781737@qq.com)
+- **Email:** [ww7517437@gmail.com](mailto:ww7517437@gmail.com)
 - **QQ Group:** 942400892
 - **Discord:**
 [reverse-skill](https://discord.gg/TECd3bMRR)

@@ -17,8 +17,11 @@
 
 ```powershell
 powershell -File skills\scripts\master-route.ps1 -Hint "<用户任务>"
-# 默认写出 work/master-route-<ts>/route-scope.md
+# 默认写出当前项目的 work/master-route-<ts>/route-scope.md；从其他目录调用时显式指定项目根
+powershell -File skills\scripts\master-route.ps1 -Hint "<用户任务>" -ProjectRoot "C:\path\to\analysis-project"
 powershell -File skills\scripts\case-init.ps1 -Hint "<用户任务>" -CaseName "my-case"
+# case 默认写入当前项目的 work/<case>/；-PackageRoot 保持兼容，-ProjectRoot 优先级更高
+powershell -File skills\scripts\case-init.ps1 -Hint "<用户任务>" -CaseName "my-case" -ProjectRoot "C:\path\to\analysis-project"
 # 一次成型可 ACT（授权 + 目标 + 网络档）：
 powershell -File skills\scripts\case-init.ps1 -Hint "<任务>" -CaseName "my-case" -AuthGranted -TargetUrl "https://target/" -NetworkProfile authorized_target_only
 # 冒烟：verify + 脚本解析 + 路由矩阵（含中文 Hint）
@@ -27,6 +30,7 @@ powershell -File skills\scripts\smoke.ps1
 powershell -File skills\scripts\case-guard.ps1 -CaseRoot work\my-case
 # Evidence 追加
 powershell -File skills\scripts\append-evidence.ps1 -CaseRoot work\my-case -Id E-001 -Title "..." -ReproCommand "..."
+python3 skills/case-review/scripts/review_case.py work/<case> --verify-hashes --strict
 ```
 
 ## 作战契约（ops）
@@ -36,6 +40,7 @@ powershell -File skills\scripts\append-evidence.ps1 -CaseRoot work\my-case -Id E
 | `ops/IDENTITY.md` | 我们是路由包，不是 Z3r0 平台 |
 | `ops/scope-contract.md` | 启动门槛 |
 | `ops/evidence-finding-path.md` | 证据链 |
+| `case-review/SKILL.md` | Evidence 图审查与报告交接 |
 | `ops/role-map.md` | 角色→skill |
 | `ops/timeline-workitem.md` | 时间线与覆盖 |
 | `ops/sandbox-profile.md` | 工具对照 |
@@ -69,6 +74,7 @@ powershell -File skills\scripts\append-evidence.ps1 -CaseRoot work\my-case -Id E
 | **R19** | 浏览器/桌面自动化 | `browser-automation/` |
 | **R20** | 报告 / writeup | `docs-generator/` |
 | **R39** | 图表 / Mermaid / Graphviz / PlantUML / 架构图 | `diagram-generator/` |
+| **R40** | Case / Evidence 图审查 | `case-review/` |
 | **R21** | 协议 / Protobuf / PCAP 协议 | `protocol-reverse/` |
 | **R22** | Ghidra / 开源反编译 | `ghidra-reverse/` |
 | **R23** | 云 / 容器 / K8s | `cloud-k8s/` |

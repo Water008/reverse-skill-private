@@ -26,7 +26,8 @@ flowchart TD
     
     Execute --> TaskDone{任务完成?}
     TaskDone -->|否| Execute
-    TaskDone -->|是| GenReport[调用 docs-generator<br/>生成报告 + 图表]
+    TaskDone -->|是| ReviewCase[调用 case-review<br/>校验证据图]
+    ReviewCase --> GenReport[调用 docs-generator<br/>生成报告 + 图表]
     
     GenReport --> WriteJournal[回写 field-journal<br/>经验沉淀]
     WriteJournal --> UpdateIndex[更新索引/路由/manifest]
@@ -76,6 +77,7 @@ flowchart LR
     subgraph 输出层
         Docs[docs-generator<br/>报告生成]
         Diagram[diagram-generator<br/>图表生成]
+        Review[case-review<br/>Evidence graph audit]
         Journal[field-journal<br/>自动进化]
     end
 
@@ -99,7 +101,8 @@ flowchart LR
     
     Bootstrap --> Discovery --> ToolIndex
     
-    APK & IDA & R2 & Pentest & JS -->|任务完成| Docs
+    APK & IDA & R2 & Pentest & JS -->|任务完成| Review
+    Review --> Docs
     Docs --> Diagram
     Docs --> Journal
 ```

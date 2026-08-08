@@ -167,9 +167,13 @@ banner "配置 MCP 客户端"
 
 # 检测实际用户（sudo 下 $HOME 可能是 /root）
 REAL_USER="${SUDO_USER:-root}"
-REAL_HOME=$(getent passwd "$REAL_USER" | cut -d: -f6 2>/dev/null)
-if [[ -z "$REAL_HOME" ]]; then
-    REAL_HOME="$HOME"
+REAL_HOME="$(getent passwd "$REAL_USER" 2>/dev/null | cut -d: -f6 || true)"
+if [[ -z "$REAL_HOME" || ! -d "$REAL_HOME" ]]; then
+    REAL_USER="root"
+    REAL_HOME="$(getent passwd root 2>/dev/null | cut -d: -f6 || true)"
+fi
+if [[ -z "$REAL_HOME" || ! -d "$REAL_HOME" ]]; then
+    REAL_HOME="/root"
 fi
 
 MCP_CONFIG_DIR="$REAL_HOME/.claude"

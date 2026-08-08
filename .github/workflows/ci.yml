@@ -1,0 +1,80 @@
+# reverse-skill CI：路由回归 + 结构一致性 + 供应链 pin gate + 冒烟
+# 矩阵：windows-latest（原生 powershell 5.1） + ubuntu-latest（pwsh + powershell shim）
+# 触发：所有分支（含 fork 的改进分支），PR 也触发
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  routing-tests:
+    name: routing tests (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # 脚本内部以 `powershell` 调用子进程；Linux runner 只有 pwsh，做个 shim
+      - name: powershell shim (linux)
+        if: runner.os == 'Linux'
+        shell: bash
+        run: sudo ln -sf "$(command -v pwsh)" /usr/local/bin/powershell
+
+      - name: Routing regression (162 cases)
+        shell: pwsh
+        run: ./skills/scripts/test-routing.ps1
+
+      - name: Routing coherence + supply-chain pin gate
+        shell: pwsh
+        run: ./skills/scripts/verify-routing-coherence.ps1
+
+      - name: Smoke (verify + parse + quick route)
+        shell: pwsh
+        run: ./skills/scripts/smoke.ps1
+
+      - name: INDEX.md up-to-date check
+        shell: pwsh
+        run: ./skills/scripts/extract-summaries.ps1 -Check
+
+      - name: All JSON manifests valid
+        shell: pwsh
+        run: |
+          Get-Content skills/scripts/bootstrap-manifest.json -Raw -Encoding UTF8 | ConvertFrom-Json | Out-Null
+          Get-Content kali/scripts/bootstrap-manifest.json -Raw -Encoding UTF8 | ConvertFrom-Json | Out-Null
+          Get-Content skills/config/routing.json -Raw -Encoding UTF8 | ConvertFrom-Json | Out-Null
+          Get-Content skills/tests/routing-benchmark.json -Raw -Encoding UTF8 | ConvertFrom-Json | Out-Null
+          Write-Host "All JSON valid"
+
+  sh-syntax:
+    name: shell script syntax check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: bash -n all .sh
+        shell: bash
+        run: |
+          set -e
+          while IFS= read -r f; do
+            bash -n "$f"
+            echo "syntax OK: $f"
+          done < <(git ls-files '*.sh')
+
+      - name: Structured routing parity (Bash)
+        shell: bash
+        run: |
+          set -euo pipefail
+          scratch="$(mktemp -d)"
+          trap 'rm -rf "$scratch"' EXIT
+          while IFS='|' read -r hint expected; do
+            out="$scratch/$expected"
+            bash skills/scripts/master-route.sh --hint "$hint" --out-dir "$out"
+            grep -Eq "^- primary: ${expected}$" "$out/route-scope.md"
+          done <<'CASES'
+          apk reverse with jadx|R1
+          js reverse signature|R3
+          case review evidence graph|R40
+          CASES

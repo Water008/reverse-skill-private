@@ -14,7 +14,8 @@ $skillsRoot = Split-Path -Parent $scriptDir
 if (-not $PackageRoot) { $PackageRoot = Split-Path -Parent $skillsRoot }
 
 if ([string]::IsNullOrWhiteSpace($ScratchDir)) {
-    $ScratchDir = Join-Path $env:TEMP ('rs-p0-test-' + (Get-Date -Format 'yyyyMMdd-HHmmss'))
+    $tmpBase = if ($env:TEMP) { $env:TEMP } else { [System.IO.Path]::GetTempPath() }
+    $ScratchDir = Join-Path $tmpBase ('rs-p0-test-' + (Get-Date -Format 'yyyyMMdd-HHmmss'))
 }
 New-Item -ItemType Directory -Path $ScratchDir -Force | Out-Null
 
@@ -96,6 +97,25 @@ else {
     if ($ev -match 'curl -sI') { Ok 'evidence repro body' } else { Bad 'evidence repro body missing' }
 }
 
+$artifact = Join-Path $evCase 'evidence\fixture.bin'
+[System.IO.File]::WriteAllBytes($artifact, [System.Text.Encoding]::UTF8.GetBytes('case artifact'))
+& powershell -NoProfile -ExecutionPolicy Bypass -File $ae `
+    -CaseRoot $evCase `
+    -Id 'E-002' `
+    -Title 'Hashed evidence item' `
+    -ReproCommand 'Get-FileHash evidence\fixture.bin -Algorithm SHA256' `
+    -ArtifactPath 'evidence\fixture.bin' `
+    -Severity info `
+    -Status observed 2>&1 | Out-Null
+$hashedEvidence = Join-Path $evCase 'evidence\E-002.md'
+if (-not (Test-Path $hashedEvidence)) { Bad 'E-002.md not written' }
+else {
+    $hashedText = Get-Content $hashedEvidence -Raw -Encoding UTF8
+    $expectedHash = (Get-FileHash -LiteralPath $artifact -Algorithm SHA256).Hash.ToLowerInvariant()
+    if ($hashedText -match [regex]::Escape('sha256:' + $expectedHash)) { Ok 'evidence SHA-256 recorded' } else { Bad 'evidence SHA-256 missing or incorrect' }
+    if ($hashedText -match '(?m)^- artifact_path:\s*evidence/fixture\.bin\s*$') { Ok 'evidence artifact path recorded' } else { Bad 'evidence artifact path missing' }
+}
+
 # 5) recon-pipeline topics present
 $recon = Join-Path $skillsRoot 'pentest-tools\references\recon-pipeline.md'
 $rt = Get-Content $recon -Raw -Encoding UTF8
@@ -141,11 +161,15 @@ if ($LASTEXITCODE -eq 2) { Ok 'case-guard pending exit 2' } else { Bad "case-gua
 if ($LASTEXITCODE -eq 0) { Ok 'case-guard -Force exit 0' } else { Bad "case-guard -Force exit $LASTEXITCODE" }
 
 # 10) AuthGranted must not be clobbered by junk AuthStatus / multi-asset lab init
+# Note: -ProjectRoot is passed explicitly to prevent the -InScopeAssets array
+# from being flattened by powershell -File and binding its second element to the
+# -ProjectRoot positional parameter slot.
 $labName = 'p0-lab-' + (Get-Date -Format 'HHmmss')
 & powershell -NoProfile -ExecutionPolicy Bypass -File $ci `
     -Hint 'gin juice lab pentest' `
     -CaseName $labName `
     -PackageRoot $PackageRoot `
+    -ProjectRoot $PackageRoot `
     -AuthGranted `
     -AuthBasis 'public_training_lab' `
     -EvidenceOfAuth 'PortSwigger intentionally vulnerable public site example' `
@@ -308,7 +332,7 @@ if (Test-Path $smokeLog) {
 
 # OPT summary
 $opt = @(
-    "entrypoints: smoke.ps1, case-init.ps1, append-evidence.ps1, case-guard.ps1, master-route.ps1, verify-routing-coherence.ps1, test-p0-friction.ps1",
+    "entrypoints: smoke.ps1, case-init.ps1, append-evidence.ps1, case-guard.ps1, case-review/review_case.py, master-route.ps1, verify-routing-coherence.ps1, test-p0-friction.ps1",
     "docs: recon-pipeline.md (Origin/Referer, nmap -sT/eth0, globoff, append-evidence); client-side-lab-playbook.md (innerHTML sink, agent-browser, observed vs validated, PP)",
     "ghost_skills: blockchain-security=$(Test-Path (Join-Path $skillsRoot 'blockchain-security')) bitcoin-puzzle=$(Test-Path (Join-Path $skillsRoot 'bitcoin-puzzle'))",
     "FAIL_COUNT=$($fail.Count)",

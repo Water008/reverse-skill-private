@@ -1,6 +1,6 @@
 # reverse-skill 包内安全审计（可执行面）
 
-> 日期：2026-07-18  
+> 日期：2026-08-02
 > 范围：`skills/**/scripts`、`skills/scripts`、`kali/scripts`、`burp-mcp-full` 可执行脚本与 bootstrap 清单  
 > **不含**：`src-hunter` / payloader 等**教学型 payload 文档**（其 DROP/注入样例属方法论，非自动执行）
 
@@ -25,6 +25,17 @@
 | apktool | pin `v3.0.2` + `assetSha256` |
 | bootstrap PS/sh | 下载后 `Assert-DownloadedFileIntegrity` / `verify_sha256`；优先 manifest 哈希，其次 GitHub `digest`；失败删文件并中止 |
 | 未钉哈希的 release | 仍可安装，但 **WARN** 并打印实际 sha256 |
+
+### 2026-08-02 安全修复
+
+| 项 | 修复 |
+|----|------|
+| Kali quick setup | 使用 `getent` 解析 sudo 用户 home，移除 `eval` |
+| Frida process listing | 使用 `frida-ps` 参数数组，移除内联 Python 代码拼接 |
+| Burp MCP token | 使用受限临时文件原子替换，POSIX 文件权限固定为 `0600` |
+| Burp MCP bridge | 按 MCP 换行消息解析，并在 Burp 启动后按需重连 |
+| Anything Analyzer MCP | bootstrap 默认启用 bearer auth，并通过可选宿主适配器注册凭据 |
+| IDA MCP startup | 逐个结束旧进程，避免多 PID 参数展开错误 |
 
 ## 扫描方法
 
@@ -95,6 +106,7 @@ skills/radare2/scripts/*
 skills/ida-reverse/scripts/*
 skills/browser-automation/scripts/*
 skills/diagram-generator/scripts/*.py
+skills/case-review/scripts/*.py
 kali/scripts/*
 burp-mcp-full/mcp-bridge.js (+ Java 扩展源)
 ```

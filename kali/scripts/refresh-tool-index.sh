@@ -53,7 +53,7 @@ GENERATED_AT=$(date '+%Y-%m-%d %H:%M:%S %z')
     echo "| 能力 | 工具可用 | MCP 已注册 | 服务在线 | 可自动安装 | 安装方式 |"
     echo "|------|---------|-----------|---------|-----------|---------|"
 
-    CAPABILITY_NAMES=("jadx" "apktool" "jeb-pro" "frida" "idalib-mcp" "jshookmcp" "reqable-mcp" "anything-analyzer" "idapro" "r2" "adb" "agent-browser" "ghidra-mcp" "seclists" "proxycat" "burpsuite-mcp" "nmap" "sqlmap" "hashcat" "hydra" "gobuster" "ffuf" "msfconsole" "nuclei")
+    CAPABILITY_NAMES=("jadx" "apktool" "jeb-pro" "frida" "idalib-mcp" "jshookmcp" "reqable-mcp" "anything-analyzer" "idapro" "r2" "adb" "agent-browser" "ghidra-mcp" "seclists" "proxycat" "burpsuite-mcp" "nmap" "sqlmap" "hashcat" "hydra" "gobuster" "ffuf" "msfconsole" "nuclei" "bkcrack")
 
     for cap_name in "${CAPABILITY_NAMES[@]}"; do
         # 检查工具是否可用

@@ -16,7 +16,8 @@ if (-not $PackageRoot) { $PackageRoot = Split-Path -Parent $skillsRoot }
 
 if ([string]::IsNullOrWhiteSpace($LogDir)) {
     $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
-    $LogDir = Join-Path $env:TEMP ("rs-smoke-{0}" -f $stamp)
+    $tmpBase = if ($env:TEMP) { $env:TEMP } else { [System.IO.Path]::GetTempPath() }
+    $LogDir = Join-Path $tmpBase ("rs-smoke-{0}" -f $stamp)
 }
 New-Item -ItemType Directory -Path $LogDir -Force | Out-Null
 
@@ -46,11 +47,14 @@ $scripts = @(
     'verify-routing-coherence.ps1',
     'master-route.ps1',
     'case-init.ps1',
+    'lib\WorkRoot.ps1',
     'bootstrap-reverse.ps1',
     'refresh-tool-index.ps1',
     'smoke.ps1',
     'append-evidence.ps1',
-    'case-guard.ps1'
+    'case-guard.ps1',
+    'test-routing.ps1',
+    'extract-summaries.ps1'
 )
 $parseOk = 0
 $parseFail = 0
@@ -91,7 +95,8 @@ $cases = @(
     @{ Name = 'llm'; Hint = 'LLM prompt inject jailbreak agent security garak'; Expect = 'llm-security' },
     @{ Name = 'zh-apk'; Hint = '安卓 APK 加固 反编译'; Expect = 'apk-reverse' },
     @{ Name = 'zh-pentest'; Hint = '渗透测试 端口扫描 SQL注入'; Expect = 'pentest-tools' },
-    @{ Name = 'zh-js'; Hint = '前端签名 JS逆向 加密参数'; Expect = 'js-reverse' }
+    @{ Name = 'zh-js'; Hint = '前端签名 JS逆向 加密参数'; Expect = 'js-reverse' },
+    @{ Name = 'evidence'; Hint = 'case review evidence chain traceability'; Expect = 'case-review' }
 )
 $routeOk = 0
 $routeFail = 0

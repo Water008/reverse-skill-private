@@ -29,9 +29,15 @@ import burp.api.montoya.websocket.extension.ExtensionWebSocket;
 import java.time.ZonedDateTime;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.AtomicMoveNotSupportedException;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.security.SecureRandom;
 import java.util.*;
 import java.util.concurrent.*;
@@ -67,16 +73,51 @@ public class McpHttpServer extends NanoHTTPD {
         token = token.trim();
         try {
             Path tokenFile = Paths.get(System.getProperty("user.home"), ".burp-mcp-token");
-            Files.write(tokenFile, token.getBytes(StandardCharsets.UTF_8));
-            if (java.nio.file.FileSystems.getDefault().supportedFileAttributeViews().contains("posix")) {
-                java.util.Set<java.nio.file.attribute.PosixFilePermission> perms = java.util.EnumSet.of(
-                    java.nio.file.attribute.PosixFilePermission.OWNER_READ,
-                    java.nio.file.attribute.PosixFilePermission.OWNER_WRITE
-                );
-                Files.setPosixFilePermissions(tokenFile, perms);
-            }
+            writeTokenFile(tokenFile, token);
         } catch (IOException ignored) { }
         return token;
+    }
+
+    private void writeTokenFile(Path tokenFile, String token) throws IOException {
+        Set<PosixFilePermission> ownerOnly = EnumSet.of(
+                PosixFilePermission.OWNER_READ,
+                PosixFilePermission.OWNER_WRITE);
+        boolean supportsPosix = FileSystems.getDefault()
+                .supportedFileAttributeViews()
+                .contains("posix");
+        Path parent = tokenFile.toAbsolutePath().getParent();
+        Path temporaryFile = supportsPosix
+                ? Files.createTempFile(
+                        parent,
+                        ".burp-mcp-token-",
+                        ".tmp",
+                        PosixFilePermissions.asFileAttribute(ownerOnly))
+                : Files.createTempFile(parent, ".burp-mcp-token-", ".tmp");
+        try {
+            Files.writeString(
+                    temporaryFile,
+                    token,
+                    StandardCharsets.UTF_8,
+                    StandardOpenOption.TRUNCATE_EXISTING,
+                    StandardOpenOption.WRITE);
+            if (supportsPosix) {
+                Files.setPosixFilePermissions(temporaryFile, ownerOnly);
+            }
+            try {
+                Files.move(
+                        temporaryFile,
+                        tokenFile,
+                        StandardCopyOption.ATOMIC_MOVE,
+                        StandardCopyOption.REPLACE_EXISTING);
+            } catch (AtomicMoveNotSupportedException ignored) {
+                Files.move(temporaryFile, tokenFile, StandardCopyOption.REPLACE_EXISTING);
+            }
+            if (supportsPosix) {
+                Files.setPosixFilePermissions(tokenFile, ownerOnly);
+            }
+        } finally {
+            Files.deleteIfExists(temporaryFile);
+        }
     }
 
     private boolean isAuthorized(IHTTPSession session) {
@@ -1667,4 +1708,3 @@ public class McpHttpServer extends NanoHTTPD {
         resp.addHeader("Vary", "Origin");
     }
 }
-

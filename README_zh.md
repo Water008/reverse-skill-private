@@ -134,6 +134,7 @@ git clone https://github.com/zhaoxuya520/reverse-skill.git
 | 恶意软件 / YARA | `skills/malware-analysis/` |
 | 渗透测试 / 漏洞扫描 | `skills/pentest-tools/` |
 | 攻击链 / 红队编排 | `skills/attack-chain/` |
+| Case 证据审查 / 报告交接 | `skills/case-review/` |
 | CTF 竞赛 | `CTF-Sandbox-Orchestrator/` (40+ 子技能) |
 | 固件 / IoT | `skills/firmware-pentest/` |
 | 补丁差分 / N-day | `skills/patch-diff-exploit/` |
@@ -157,6 +158,7 @@ git clone https://github.com/zhaoxuya520/reverse-skill.git
 | [skills/tool-index.md](skills/tool-index.md) | 本机工具索引（自动生成） |
 | [skills/scripts/master-route.ps1](skills/scripts/master-route.ps1) | 一键分诊 |
 | [skills/scripts/case-init.ps1](skills/scripts/case-init.ps1) | 作战 case 目录（scope/timeline） |
+| [skills/case-review/](skills/case-review/) | 只读 Evidence 图审查与 artifact fixity 校验 |
 | [skills/ops/](skills/ops/) | Scope / 证据链 / 角色 / 时间线 / skill 供应链安全 |
 | [skills/references/community-security-skills.md](skills/references/community-security-skills.md) | 社区安全 skill 生态对照（借鉴不并库） |
 
